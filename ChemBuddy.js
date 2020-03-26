@@ -3,6 +3,10 @@ readRecords("AllELEMENTS", {}, function(records) {
   appendItem(ElementList,"");
   for (var i =0; i < records.length; i++) {
     appendItem(ElementList,(records[i]).Element);
+   /* setKeyValue(records[i].Element, records[i].Atomic_number, function () {
+      
+    });*/
+    
   }
   setProperty("El1", "options", ElementList);
   setProperty("El2", "options", ElementList);
@@ -22,7 +26,7 @@ onEvent("button1", "click", function( ) {
   var choiceList=[El1Choice,El2Choice,El3Choice,El4Choice,El5Choice,El6Choice];
   //console.log(choiceList)
   var finalCl=[];
-  var AtomicNumberList=[]
+  var AtomicNumberList=[];
   for(i=0;i<choiceList.length;i++)
   {
     if(choiceList[i]=="")
@@ -32,20 +36,34 @@ onEvent("button1", "click", function( ) {
    //console.log(choiceList[i]);
     appendItem(finalCl,choiceList[i]);
     var labelid="AN"+(i+1);
-  
+    //console.log(getNumber(labelid));
+    appendItem(AtomicNumberList,getNumber(labelid));
     
   }
-  var Atomic_numberList=[]
-  for(i=0;i<finalCl.length;i++)
-  {
-
-//getKeyValue(finalCl[i], function (value) {
-  // appendItem(Atomic_numberList,value)
-});
-
-  }  
-
- console.log(finalCl,Atomic_numberList);
+  
+  
+ console.log(finalCl,AtomicNumberList);
+ var temp;
+ for(i=0;i<finalCl.length-1;i++)
+ {
+   for(j=0;j<finalCl.length-1;j++)
+   {
+     if(AtomicNumberList[j]>AtomicNumberList[j+1])
+     {
+       temp=AtomicNumberList[j];
+       AtomicNumberList[j]=AtomicNumberList[j+1]
+       AtomicNumberList[j+1]=temp;
+       
+       
+       temp=finalCl[j];
+       finalCl[j]=finalCl[j+1]
+       finalCl[j+1]=temp;
+     }
+   }
+ }
+ console.log(finalCl,AtomicNumberList);
+ GetAllMatchingCompounds(finalCl);
+ 
 });
 
 onEvent("El1", "change", function( ) {
@@ -96,19 +114,70 @@ getKeyValue(elementName, function (value) {
 setText("AN6", value);
 });
 });
-function myFunction(n) {
+
+
+function GetAllMatchingCompounds(elementList) {
  var searchterm={};
- searchterm.Element1=El1Choice;
- searchterm.Element2=El2Choice;
- searchterm.Element3=El3Choice;
- searchterm.Element4=El4Choice;
- searchterm.Element5=El5Choice;
-searchterm.Element6=El6Choice;
- console.log(searchterm);
-console.log(El1Choice);
+  searchterm.Element1="";
+  searchterm.Element2="";
+  searchterm.Element3="";
+  searchterm.Element4="";
+  searchterm.Element5="";
+  searchterm.Element6="";
+ for(var i=0;i<elementList.length;i++)
+ {
+   if(i==0)
+   {
+     searchterm.Element1=elementList[i];
+   }
+    if(i==1)
+   {
+     searchterm.Element2=elementList[i];
+   }
+    if(i==2)
+   {
+     searchterm.Element3=elementList[i];
+   }
+    if(i==3)
+   {
+     searchterm.Element4=elementList[i];
+   }
+    if(i==4)
+   {
+     searchterm.Element5=elementList[i];
+   }
+    if(i==5)
+   {
+     searchterm.Element6=elementList[i];
+   }
+ }
+ 
+
   readRecords("ALLCOMPOUNDS", searchterm , function(records) {
+    var result=[];
     for (var i =0; i < records.length; i++) {
-      console.log(records[i].id + ': ' + records[i].Compound_Name);
+      
+        appendItem(result,records[i].Compound_Name);
     }
+    
+    setProperty("compoundList", "options", result);
+    setScreen("DisplayScreen");
+    
   });
 }
+onEvent("compoundList", "change", function( ) {
+  var compoundName=getText("compoundList")
+  searchterm={};
+  searchterm.Compound_Name=compoundName
+  readRecords("ALLCOMPOUNDS", searchterm , function(records) {
+    //console.log(records[0].Molecular_Formula)
+    setText("resultsLabel", records[0].Molecular_Formula);
+    
+  });
+  
+});
+onEvent("Back", "click", function( ) {
+  setScreen("SearchScreen");
+});
+
+
